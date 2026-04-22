@@ -1,5 +1,8 @@
 import { useState } from "react";
 import expandIcon from "./assets/expand.png";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import ChairModel from "./components/ChairModel";
 
 export default function App() {
   const [expanded, setExpanded] = useState(false);
@@ -13,17 +16,24 @@ export default function App() {
           ${expanded ? "w-full" : "w-[75%]"}
         `}
       >
-        <h1 className="text-4xl font-bold">Grid 1</h1>
+        <Canvas camera={{ position: [0, 1, 3] }}>
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[2, 2, 2]} />
+
+          <ChairModel />
+
+          <OrbitControls />
+        </Canvas>
 
         <button
           onClick={() => setExpanded(!expanded)}
           className="absolute top-3 right-3 "
         >
-          <img
-            src={expandIcon}
-            alt="expand"
-            className="w-5 h-5"
-          />
+          <img 
+          src={expandIcon}
+           alt="expand" 
+           className="w-5 h-5"
+            />
         </button>
       </div>
 
