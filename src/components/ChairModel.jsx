@@ -2,9 +2,12 @@ import { useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 
 export default function ChairModel({ backType }) {
-  const model = useGLTF("/chair_citizen.glb");
+  const { scene } = useGLTF("/chair_citizen.glb");
 
   useEffect(() => {
+    if (!scene) return;
+
+    // Always hidden
     const hiddenNodes = [
       "Laser",
       "Plano",
@@ -26,13 +29,20 @@ export default function ChairModel({ backType }) {
     ];
 
     hiddenNodes.forEach((name) => {
-      const obj = model.scene.getObjectByName(name);
-      if (obj) {
-        obj.visible = false;
-      }
+      const obj = scene.getObjectByName(name);
+      if (obj) obj.visible = false;
     });
 
-  }, [model]);
+    // Back logic 
+    const highBack = scene.getObjectByName("citizen_highback");
+    const lowBack = scene.getObjectByName("citizen_Lowback");
+    const pillow = scene.getObjectByName("citizen_cover");
 
-  return <primitive object={model.scene} scale={1.5} />;
+    if (highBack) highBack.visible = backType === "high";
+    if (lowBack) lowBack.visible = backType === "low";
+    if (pillow) pillow.visible = backType === "high";
+
+  }, [scene, backType]);
+
+  return <primitive object={scene} scale={1.5} />;
 }
