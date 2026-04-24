@@ -44,5 +44,5 @@ export default function ChairModel({ backType }) {
 
   }, [scene, backType]);
 
-  return <primitive object={scene} scale={1.5} />;
+  return <primitive object={scene} scale={3} rotation={[0.2, 0.8, 0]} position={[0, -1, 0]}  />;
 }
