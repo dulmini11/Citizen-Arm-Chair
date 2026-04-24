@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import expandIcon from "./assets/expand.png";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import ChairModel from "./components/ChairModel";
-import arrow from "./assets/res/arrow.png";
+import highback from "./assets/highback.png";
+import lowback from "./assets/lowback.png";
 import plano1 from "./assets/res/materials/planobluecoconutmtl1.png";
 import plano2 from "./assets/res/materials/planoclasseicgreenforestmtl.png";
 import plano3 from "./assets/res/materials/planocognacmtl.png";
@@ -24,6 +25,55 @@ import credo2 from "./assets/res/materials/credoredchilliemtl.png";
 import credo3 from "./assets/res/materials/credoroyalblueelephantmtl.png";
 import credo4 from "./assets/res/materials/credosafferonmtl.png";
 
+function ChairDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const options = [
+    { value: "low", label: "Low Back", img: lowback },
+    { value: "high", label: "High Back", img: highback },
+  ];
+
+  const selected = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-full mt-6 mb-8">
+      <div
+        onClick={() => setOpen(!open)}
+        className="flex items-center justify-between px-4 py-3 bg-white shadow-md cursor-pointer select-none"
+      >
+        <div className="flex items-center gap-3">
+          <img src={selected.img} alt={selected.label} className="w-11 h-11 object-contain" />
+          <span className="font-popp text-sm md:text-base">{selected.label}</span>
+        </div>
+        <span className={`text-xs text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>▼</span>
+      </div>
+
+    {open && (
+      <div className="absolute z-10 left-0 right-0 top-full bg-white shadow-lg border border-gray-100">
+        {options.filter((opt) => opt.value !== value).map((opt) => (
+          <div
+            key={opt.value}
+            onClick={() => { onChange(opt.value); setOpen(false); }}
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+          >
+            <img src={opt.img} alt={opt.label} className="w-11 h-11 object-contain" />
+            <span className="font-popp text-sm md:text-base">{opt.label}</span>
+          </div>
+        ))}
+      </div>
+    )}
+    </div>
+  );
+}
 
 export default function App() {
   const [expanded, setExpanded] = useState(false);
@@ -84,14 +134,7 @@ export default function App() {
           seat is suspended on three cables, enabling a pleasant swinging movement and a unique dynamic experience for the sitter.
         </p>
 
-        <select
-          value={backType}
-          onChange={(e) => setBackType(e.target.value)}
-          className="w-full bg-white text-black border border-gray-300 px-4 py-4 rounded-md focus:outline-none mt-6 mb-8"
-        >
-          <option className="bg-white" value="low">Low back</option>
-          <option value="high">High back</option>
-        </select>
+        <ChairDropdown value={backType} onChange={setBackType} />
 
         <h4 className="mb-2">Seat</h4>       
         <div className="flex bg-white w-full overflow-hidden rounded-md">
