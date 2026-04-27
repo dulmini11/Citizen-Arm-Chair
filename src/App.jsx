@@ -99,8 +99,12 @@ export default function App() {
   const [expanded, setExpanded] = useState(false);
   const [backType, setBackType] = useState("low");
 
-  const [activeTab, setActiveTab] = useState("Plano");
-  const [selected, setSelected] = useState(null);
+  // Separate state for Seat and Neck Cushion
+  const [seatTab, setSeatTab] = useState("Plano");
+  const [seatSelected, setSeatSelected] = useState(null);
+
+  const [neckTab, setNeckTab] = useState("Plano");
+  const [neckSelected, setNeckSelected] = useState(null);
 
   const materials = {
     Plano: [plano1, plano2, plano3, plano4],
@@ -123,8 +127,8 @@ export default function App() {
           <TextureConsumer
             backType={backType}
             materials={materials}
-            activeTab={activeTab}
-            selected={selected}
+            seatTab={seatTab}
+            seatSelected={seatSelected}
           />
           <OrbitControls />
 
@@ -169,17 +173,18 @@ export default function App() {
 
           <ChairDropdown value={backType} onChange={setBackType} />
 
+          // Seat section
           <h4 className="mb-2">Seat</h4>
           <div className="flex bg-white w-full overflow-hidden rounded-md">
             {["Plano", "Laser", "Cosy", "Credo"].map((tab) => (
             <button
               key={tab}
               onClick={() => {
-                setActiveTab(tab);
-                setSelected(null);
+                setSeatTab(tab);
+                setSeatSelected(null);
               }}
               className={`flex-1 py-2 text-center border border-gray-300 hover:bg-gray-200 ${
-                activeTab === tab
+                seatTab === tab
                   ? "bg-blue-600 text-white"
                   : "text-black"
               }`}
@@ -189,15 +194,14 @@ export default function App() {
             ))}
           </div>
 
-        {/* Circles */}
           <div className="flex gap-6 mt-6 mb-12">
-            {materials[activeTab].map((img, index) => (
+            {materials[seatTab].map((img, index) => (
               <div
                 key={index}
-                onClick={() => setSelected(index)}
+                onClick={() => setSeatSelected(index)}
                 className={`w-14 h-14 rounded-full cursor-pointer flex items-center justify-center
                 ${
-                  selected === index
+                  seatSelected === index
                     ? "border-2 border-blue-500"
                     : "border border-white"
                 }`}
@@ -210,6 +214,52 @@ export default function App() {
             ))}
           </div>
 
+          // Neck Cushion — only visible when high back is selected
+          {backType === "high" && (
+            <>
+              <h4 className="mb-2">Neck Cushion</h4>
+              <div className="flex bg-white w-full overflow-hidden rounded-md">
+                {["Plano", "Laser", "Cosy"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setNeckTab(tab);
+                    setNeckSelected(null);
+                  }}
+                  className={`flex-1 py-2 text-center border border-gray-300 hover:bg-gray-200 ${
+                    neckTab === tab
+                      ? "bg-blue-600 text-white"
+                      : "text-black"
+                  }`}
+                >
+                  {tab}
+                  </button>
+                ))}
+              </div>
+
+              // Neck Cushion Circles
+              <div className="flex gap-6 mt-6 mb-12">
+                {materials[neckTab].map((img, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setNeckSelected(index)}
+                    className={`w-14 h-14 rounded-full cursor-pointer flex items-center justify-center
+                    ${
+                      neckSelected === index
+                        ? "border-2 border-blue-500"
+                        : "border border-white"
+                    }`}
+                >
+                    <div
+                      className="w-11 h-11 rounded-full bg-cover bg-center"
+                      style={{ backgroundImage: `url(${img})` }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
           <button className="focus:outline-none w-full h-12 bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white text-center text-base md:text-xl ">
             Purchase
           </button>
@@ -221,7 +271,7 @@ export default function App() {
 }
 
 //  This runs INSIDE Canvas so useTexture works
-function TextureConsumer({ backType, materials, activeTab, selected }) {
+function TextureConsumer({ backType, materials, seatTab, seatSelected }) {
   // Preload ALL textures at once — Drei caches them by URL
   const textures = useTexture(ALL_TEXTURES);
 
@@ -233,8 +283,8 @@ function TextureConsumer({ backType, materials, activeTab, selected }) {
     Credo: materials.Credo.map((path) => textures[ALL_TEXTURES.indexOf(path)]),
   };
 
-  // Get the actual Three.js Texture object for the selected color
-  const activeTexture = selected !== null ? textureMap[activeTab][selected] : null;
+  // Get the actual Three.js Texture object for the selected seat color
+  const activeTexture = seatSelected !== null ? textureMap[seatTab][seatSelected] : null;
 
   return (
     <>
