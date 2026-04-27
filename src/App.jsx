@@ -83,18 +83,6 @@ function ChairDropdown({ value, onChange }) {
   );
 }
 
-// Separate inner component inside Canvas so hooks work correctly
-function Scene({ backType, textureMap }) {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[2, 2, 2]} />
-      <ChairModel backType={backType} textureMap={textureMap} />
-      <OrbitControls />
-    </>
-  );
-}
-
 export default function App() {
   const [expanded, setExpanded] = useState(false);
   const [backType, setBackType] = useState("low");
@@ -122,13 +110,14 @@ export default function App() {
           ${expanded ? "w-full" : "w-[75%]"}
         `}
       >
-        {/* TexturePreloader must be INSIDE Canvas */}
         <Canvas camera={{ position: [0, 1, 3] }}>
           <TextureConsumer
             backType={backType}
             materials={materials}
             seatTab={seatTab}
             seatSelected={seatSelected}
+            neckTab={neckTab}
+            neckSelected={neckSelected}
           />
           <OrbitControls />
 
@@ -173,7 +162,7 @@ export default function App() {
 
           <ChairDropdown value={backType} onChange={setBackType} />
 
-          // Seat section
+          {/* Seat section */}
           <h4 className="mb-2">Seat</h4>
           <div className="flex bg-white w-full overflow-hidden rounded-md">
             {["Plano", "Laser", "Cosy", "Credo"].map((tab) => (
@@ -194,6 +183,7 @@ export default function App() {
             ))}
           </div>
 
+          {/* Seat Circles */}
           <div className="flex gap-6 mt-6 mb-12">
             {materials[seatTab].map((img, index) => (
               <div
@@ -214,7 +204,7 @@ export default function App() {
             ))}
           </div>
 
-          // Neck Cushion — only visible when high back is selected
+          {/* Neck Cushion — only visible when high back is selected */}
           {backType === "high" && (
             <>
               <h4 className="mb-2">Neck Cushion</h4>
@@ -237,7 +227,7 @@ export default function App() {
                 ))}
               </div>
 
-              // Neck Cushion Circles
+              {/* Neck Cushion Circles */}
               <div className="flex gap-6 mt-6 mb-12">
                 {materials[neckTab].map((img, index) => (
                   <div
@@ -271,7 +261,7 @@ export default function App() {
 }
 
 //  This runs INSIDE Canvas so useTexture works
-function TextureConsumer({ backType, materials, seatTab, seatSelected }) {
+function TextureConsumer({ backType, materials, seatTab, seatSelected, neckTab, neckSelected }) {
   // Preload ALL textures at once — Drei caches them by URL
   const textures = useTexture(ALL_TEXTURES);
 
@@ -286,11 +276,13 @@ function TextureConsumer({ backType, materials, seatTab, seatSelected }) {
   // Get the actual Three.js Texture object for the selected seat color
   const activeTexture = seatSelected !== null ? textureMap[seatTab][seatSelected] : null;
 
+  const activeNeckTexture = neckSelected !== null ? textureMap[neckTab][neckSelected] : null;
+
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[2, 2, 2]} />
-      <ChairModel backType={backType} textureMap={activeTexture} />
+      <ChairModel backType={backType} textureMap={activeTexture} neckTextureMap={activeNeckTexture} />
     </>
   );
 }

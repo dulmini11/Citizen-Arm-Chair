@@ -3,7 +3,7 @@ import { useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import plano1 from "../assets/res/materials/planobluecoconutmtl1.png";
 
-export default function ChairModel({ backType, textureMap }) {
+export default function ChairModel({ backType, textureMap, neckTextureMap }) {
   const { scene } = useGLTF("/chair_citizen.glb");
   const defaultTexture = useTexture(plano1);
 
@@ -72,10 +72,10 @@ export default function ChairModel({ backType, textureMap }) {
 
     }, [scene]);
 
+  // Apply texture to seat (citizen_Lowback, citizen_highback)
   useEffect(() => {
     if (!scene || !defaultTexture) return;
 
-    //  Apply texture to ALL three parts so switching back type keeps texture
     const targetNames = ["citizen_Lowback", "citizen_highback"];
 
     // Use provided textureMap or fall back to default plano1
@@ -84,7 +84,6 @@ export default function ChairModel({ backType, textureMap }) {
     const applyTexture = (mesh) => {
       if (!mesh.isMesh) return;
 
-      // Save original material once
       if (!mesh._originalMaterial) {
         mesh._originalMaterial = mesh.material.clone();
       }
@@ -92,10 +91,9 @@ export default function ChairModel({ backType, textureMap }) {
       const newMat = mesh._originalMaterial.clone();
 
       if (activeTexture) {
-        // Clone texture so repeat doesn't affect other meshes
         const t = activeTexture.clone();
         t.colorSpace = THREE.SRGBColorSpace;
-        t.repeat.set(39, 39);
+        t.repeat.set(120, 120);
         t.wrapS = THREE.RepeatWrapping;
         t.wrapT = THREE.RepeatWrapping;
         t.needsUpdate = true;
@@ -126,6 +124,53 @@ export default function ChairModel({ backType, textureMap }) {
     });
 
   }, [scene, textureMap, defaultTexture]);
+
+  // Apply texture to neck cushion (citizen_cover)
+  useEffect(() => {
+    if (!scene || !defaultTexture) return;
+
+    const activeTexture = neckTextureMap || defaultTexture;
+
+    const applyTexture = (mesh) => {
+      if (!mesh.isMesh) return;
+
+      if (!mesh._originalNeckMaterial) {
+        mesh._originalNeckMaterial = mesh.material.clone();
+      }
+
+      const newMat = mesh._originalNeckMaterial.clone();
+
+      if (activeTexture) {
+        const t = activeTexture.clone();
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.repeat.set(39, 39);
+        t.wrapS = THREE.RepeatWrapping;
+        t.wrapT = THREE.RepeatWrapping;
+        t.needsUpdate = true;
+
+        newMat.map = t;
+
+        newMat.roughness = 0.8;
+        newMat.metalness = 0.3;
+        newMat.envMapIntensity = 1;
+      } else {
+        newMat.map = null;
+      }
+
+      newMat.needsUpdate = true;
+      mesh.material = newMat;
+    };
+
+    const cover = scene.getObjectByName("citizen_cover");
+    if (!cover) return;
+
+    if (cover.isMesh) {
+      applyTexture(cover);
+    } else {
+      cover.traverse(applyTexture);
+    }
+
+  }, [scene, neckTextureMap, defaultTexture]);
 
   return (
     <primitive
