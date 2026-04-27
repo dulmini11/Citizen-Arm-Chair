@@ -1,9 +1,11 @@
 import { useEffect } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
+import plano1 from "../assets/res/materials/planobluecoconutmtl1.png";
 
 export default function ChairModel({ backType, textureMap }) {
   const { scene } = useGLTF("/chair_citizen.glb");
+  const defaultTexture = useTexture(plano1);
 
   useEffect(() => {
     if (!scene) return;
@@ -71,10 +73,13 @@ export default function ChairModel({ backType, textureMap }) {
     }, [scene]);
 
   useEffect(() => {
-    if (!scene) return;
+    if (!scene || !defaultTexture) return;
 
     //  Apply texture to ALL three parts so switching back type keeps texture
     const targetNames = ["citizen_Lowback", "citizen_highback"];
+
+    // Use provided textureMap or fall back to default plano1
+    const activeTexture = textureMap || defaultTexture;
 
     const applyTexture = (mesh) => {
       if (!mesh.isMesh) return;
@@ -86,9 +91,9 @@ export default function ChairModel({ backType, textureMap }) {
 
       const newMat = mesh._originalMaterial.clone();
 
-      if (textureMap) {
+      if (activeTexture) {
         // Clone texture so repeat doesn't affect other meshes
-        const t = textureMap.clone();
+        const t = activeTexture.clone();
         t.colorSpace = THREE.SRGBColorSpace;
         t.repeat.set(6, 6);
         t.wrapS = THREE.RepeatWrapping;
@@ -120,7 +125,7 @@ export default function ChairModel({ backType, textureMap }) {
       }
     });
 
-  }, [scene, textureMap]);
+  }, [scene, textureMap, defaultTexture]);
 
   return (
     <primitive
