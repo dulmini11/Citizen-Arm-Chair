@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import expandIcon from "./assets/expand.png";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { OrbitControls, useTexture } from "@react-three/drei";
 import ChairModel from "./components/ChairModel";
 import highback from "./assets/highback.png";
 import lowback from "./assets/lowback.png";
@@ -24,6 +24,14 @@ import credo1 from "./assets/res/materials/credoemeraldcmtl.png";
 import credo2 from "./assets/res/materials/credoredchilliemtl.png";
 import credo3 from "./assets/res/materials/credoroyalblueelephantmtl.png";
 import credo4 from "./assets/res/materials/credosafferonmtl.png";
+
+// All texture paths in one flat array for preloading
+const ALL_TEXTURES = [
+  plano1, plano2, plano3, plano4,
+  laser1, laser2, laser3, laser4,
+  cosy1,  cosy2,  cosy3,  cosy4,
+  credo1, credo2, credo3, credo4,
+];
 
 function ChairDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -57,21 +65,33 @@ function ChairDropdown({ value, onChange }) {
         <span className={`text-xs text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>▼</span>
       </div>
 
-    {open && (
-      <div className="absolute z-10 left-0 right-0 top-full bg-white shadow-lg border border-gray-100">
-        {options.filter((opt) => opt.value !== value).map((opt) => (
-          <div
-            key={opt.value}
-            onClick={() => { onChange(opt.value); setOpen(false); }}
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-          >
-            <img src={opt.img} alt={opt.label} className="w-11 h-11 object-contain" />
-            <span className="font-popp text-sm md:text-base">{opt.label}</span>
-          </div>
-        ))}
-      </div>
-    )}
+      {open && (
+        <div className="absolute z-10 left-0 right-0 top-full bg-white shadow-lg border border-gray-100">
+          {options.filter((opt) => opt.value !== value).map((opt) => (
+            <div
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+            >
+              <img src={opt.img} alt={opt.label} className="w-11 h-11 object-contain" />
+              <span className="font-popp text-sm md:text-base">{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
+  );
+}
+
+// Separate inner component inside Canvas so hooks work correctly
+function Scene({ backType, textureMap }) {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[2, 2, 2]} />
+      <ChairModel backType={backType} textureMap={textureMap} />
+      <OrbitControls />
+    </>
   );
 }
 
@@ -98,12 +118,14 @@ export default function App() {
           ${expanded ? "w-full" : "w-[75%]"}
         `}
       >
+        {/* TexturePreloader must be INSIDE Canvas */}
         <Canvas camera={{ position: [0, 1, 3] }}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[2, 2, 2]} />
-
-          <ChairModel backType={backType} />
-
+          <TextureConsumer
+            backType={backType}
+            materials={materials}
+            activeTab={activeTab}
+            selected={selected}
+          />
           <OrbitControls />
         </Canvas>
 
@@ -120,25 +142,25 @@ export default function App() {
       </div>
 
       {!expanded && (
-      <div className="w-[25%] h-full bg-white flex flex-col items-start justify-start p-6">
-        <h1 className="leading-8 font-popp text-lg font-bold md:text-3xl md:font-semibold md:leading-10">
-          Citizen Arm Chair
-        </h1>
+        <div className="w-[25%] h-full bg-white flex flex-col items-start justify-start p-6">
+          <h1 className="leading-8 font-popp text-lg font-bold md:text-3xl md:font-semibold md:leading-10">
+            Citizen Arm Chair
+          </h1>
 
-        <h2 className="leading-5 font-popp text-sm font-light md:text-lg md:font-light mt-[0.5px]">
-          Konstantin Grcic, 2020
-        </h2>
+          <h2 className="leading-5 font-popp text-sm font-light md:text-lg md:font-light mt-[0.5px]">
+            Konstantin Grcic, 2020
+          </h2>
 
-        <p className="leading-5 font-popp text-xs font-light md:text-sm md:font-light hidden md:block mt-5">
-          The Citizen armchair combines an unconventional design with a new way of sitting: the 
-          seat is suspended on three cables, enabling a pleasant swinging movement and a unique dynamic experience for the sitter.
-        </p>
+          <p className="leading-5 font-popp text-xs font-light md:text-sm md:font-light hidden md:block mt-5">
+            The Citizen armchair combines an unconventional design with a new way of sitting: the
+            seat is suspended on three cables, enabling a pleasant swinging movement and a unique dynamic experience for the sitter.
+          </p>
 
-        <ChairDropdown value={backType} onChange={setBackType} />
+          <ChairDropdown value={backType} onChange={setBackType} />
 
-        <h4 className="mb-2">Seat</h4>       
-        <div className="flex bg-white w-full overflow-hidden rounded-md">
-          {["Plano", "Laser", "Cosy", "Credo"].map((tab) => (
+          <h4 className="mb-2">Seat</h4>
+          <div className="flex bg-white w-full overflow-hidden rounded-md">
+            {["Plano", "Laser", "Cosy", "Credo"].map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -152,37 +174,62 @@ export default function App() {
               }`}
             >
               {tab}
-            </button>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
 
         {/* Circles */}
-        <div className="flex gap-6 mt-6 mb-12">
-          {materials[activeTab].map((img, index) => (
-            <div
-              key={index}
-              onClick={() => setSelected(index)}
-              className={`w-14 h-14 rounded-full cursor-pointer flex items-center justify-center
+          <div className="flex gap-6 mt-6 mb-12">
+            {materials[activeTab].map((img, index) => (
+              <div
+                key={index}
+                onClick={() => setSelected(index)}
+                className={`w-14 h-14 rounded-full cursor-pointer flex items-center justify-center
                 ${
                   selected === index
                     ? "border-2 border-blue-500"
                     : "border border-white"
                 }`}
             >
-              <div
-                className="w-11 h-11 rounded-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${img})` }}
-              />
-            </div>
-          ))}
-        </div>
+                <div
+                  className="w-11 h-11 rounded-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${img})` }}
+                />
+              </div>
+            ))}
+          </div>
 
-        <button className="focus:outline-none w-full h-12 bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white text-center text-base md:text-xl ">
-          Purchase
-        </button>
-      </div>
+          <button className="focus:outline-none w-full h-12 bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white text-center text-base md:text-xl ">
+            Purchase
+          </button>
+        </div>
       )}
 
     </div>
+  );
+}
+
+//  This runs INSIDE Canvas so useTexture works
+function TextureConsumer({ backType, materials, activeTab, selected }) {
+  // Preload ALL textures at once — Drei caches them by URL
+  const textures = useTexture(ALL_TEXTURES);
+
+  // Map each imported path back to its loaded texture object
+  const textureMap = {
+    Plano: materials.Plano.map((path) => textures[ALL_TEXTURES.indexOf(path)]),
+    Laser: materials.Laser.map((path) => textures[ALL_TEXTURES.indexOf(path)]),
+    Cosy:  materials.Cosy.map((path)  => textures[ALL_TEXTURES.indexOf(path)]),
+    Credo: materials.Credo.map((path) => textures[ALL_TEXTURES.indexOf(path)]),
+  };
+
+  // Get the actual Three.js Texture object for the selected color
+  const activeTexture = selected !== null ? textureMap[activeTab][selected] : null;
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[2, 2, 2]} />
+      <ChairModel backType={backType} textureMap={activeTexture} />
+    </>
   );
 }

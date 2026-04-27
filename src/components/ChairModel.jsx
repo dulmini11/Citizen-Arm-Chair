@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
+import * as THREE from "three";
 
-export default function ChairModel({ backType }) {
+export default function ChairModel({ backType, textureMap }) {
   const { scene } = useGLTF("/chair_citizen.glb");
 
   useEffect(() => {
@@ -44,5 +45,52 @@ export default function ChairModel({ backType }) {
 
   }, [scene, backType]);
 
-  return <primitive object={scene} scale={3} rotation={[0.2, 0.8, 0]} position={[0, -1, 0]}  />;
+  useEffect(() => {
+    if (!scene) return;
+
+    //  Apply texture to ALL three parts so switching back type keeps texture
+    const targetNames = ["citizen_Lowback", "citizen_highback"];
+
+    const applyTexture = (mesh) => {
+      if (!mesh.isMesh) return;
+
+      // Save original material once
+      if (!mesh._originalMaterial) {
+        mesh._originalMaterial = mesh.material.clone();
+      }
+
+      const newMat = mesh._originalMaterial.clone();
+
+      if (textureMap) {
+        textureMap.colorSpace = THREE.SRGBColorSpace;
+        newMat.map = textureMap;
+      } else {
+        newMat.map = null;
+      }
+
+      newMat.needsUpdate = true;
+      mesh.material = newMat;
+    };
+
+    targetNames.forEach((name) => {
+      const obj = scene.getObjectByName(name);
+      if (!obj) return;
+
+      if (obj.isMesh) {
+        applyTexture(obj);
+      } else {
+        obj.traverse(applyTexture);
+      }
+    });
+
+  }, [scene, textureMap]);
+
+  return (
+    <primitive
+      object={scene}
+      scale={3}
+      rotation={[0.2, 0.8, 0]}
+      position={[0, -1, 0]}
+    />
+  );
 }
