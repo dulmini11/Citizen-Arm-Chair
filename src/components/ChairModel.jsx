@@ -62,8 +62,20 @@ export default function ChairModel({ backType, textureMap }) {
       const newMat = mesh._originalMaterial.clone();
 
       if (textureMap) {
-        textureMap.colorSpace = THREE.SRGBColorSpace;
-        newMat.map = textureMap;
+        // Clone texture so repeat doesn't affect other meshes
+        const t = textureMap.clone();
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.repeat.set(6, 6);
+        t.wrapS = THREE.RepeatWrapping;
+        t.wrapT = THREE.RepeatWrapping;
+        t.needsUpdate = true;
+
+        newMat.map = t;
+
+        // Better material rendering
+        newMat.roughness = 0.8;
+        newMat.metalness = 0.0;
+        newMat.envMapIntensity = 1;
       } else {
         newMat.map = null;
       }
