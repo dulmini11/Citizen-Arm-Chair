@@ -5,6 +5,8 @@ import { OrbitControls, useTexture } from "@react-three/drei";
 import ChairModel from "./components/ChairModel";
 import highback from "./assets/highback.png";
 import lowback from "./assets/lowback.png";
+import { FaShoppingCart } from "react-icons/fa";
+
 import plano1 from "./assets/res/materials/planobluecoconutmtl1.png";
 import plano2 from "./assets/res/materials/planoclasseicgreenforestmtl.png";
 import plano3 from "./assets/res/materials/planocognacmtl.png";
@@ -102,12 +104,14 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-full flex relative">
+    <div className="min-h-screen w-full flex flex-col md:flex-row relative">
 
+      {/* 3D Canvas — full width on mobile, 75% on md+ */}
       <div
         className={`
           bg-gray-100 flex items-center justify-center relative transition-all duration-300
-          ${expanded ? "w-full" : "w-[75%]"}
+          w-full h-[60vh] md:h-screen
+          ${expanded ? "md:w-full" : "md:w-[75%]"}
         `}
       >
         <Canvas camera={{ position: [0, 1, 3] }}>
@@ -135,18 +139,19 @@ export default function App() {
 
         <button
           onClick={() => setExpanded(!expanded)}
-          className="absolute top-3 right-3 "
+          className="absolute top-3 right-3"
         >
           <img 
-          src={expandIcon}
-           alt="expand" 
-           className="w-5 h-5"
-            />
+            src={expandIcon}
+            alt="expand" 
+            className="w-5 h-5"
+          />
         </button>
       </div>
 
+      {/* Right panel — full width on mobile, 25% on md+, goes below canvas on mobile */}
       {!expanded && (
-        <div className="w-[25%] h-full bg-white flex flex-col items-start justify-start p-6 overflow-y-auto">
+        <div className="w-full md:w-[25%] md:h-screen bg-white flex flex-col items-start justify-start p-6 overflow-y-auto pb-6">
           <h1 className="leading-8 font-popp text-lg font-bold md:text-3xl md:font-semibold md:leading-10">
             Citizen Arm Chair
           </h1>
@@ -163,6 +168,7 @@ export default function App() {
           <ChairDropdown value={backType} onChange={setBackType} />
 
           {/* Seat section */}
+          <h4 className="mb-2">Seat</h4>
           <div className="w-full bg-white rounded-md border border-gray-300">
             <div className="flex">
               {["Plano", "Laser", "Cosy", "Credo"].map((tab, i, arr) => (
@@ -174,7 +180,7 @@ export default function App() {
                   }}
                   className={`flex-1 py-2 text-center hover:bg-gray-200
                   ${i !== arr.length - 1 ? "border-r border-gray-300" : ""}
-                  ${seatTab === tab ? "bg-blue-600 text-black" : "text-black"}
+                  ${seatTab === tab ? "bg-blue-600 text-white" : "text-black"}
                   `}
                 >
                   {tab}
@@ -219,7 +225,7 @@ export default function App() {
                       }}
                       className={`flex-1 py-2 text-center hover:bg-gray-200
                       ${i !== arr.length - 1 ? "border-r border-gray-300" : ""}
-                      ${neckTab === tab ? "bg-blue-600 text-black" : "text-black"}
+                      ${neckTab === tab ? "bg-blue-600 text-white" : "text-black"}
                       `}
                     >
                       {tab}
@@ -251,9 +257,10 @@ export default function App() {
             </>
           )}
 
-        <button className="focus:outline-none w-full h-12 bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white text-center text-base md:text-xl mt-2 mb-4">
-          Purchase
-        </button>
+          <button className="focus:outline-none w-full min-h-[48px] bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white flex items-center justify-center gap-2 text-base md:text-xl mt-2 mb-2 shrink-0">
+            <FaShoppingCart size={18} />
+            Purchase
+          </button>
         </div>
       )}
 
