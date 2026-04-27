@@ -127,6 +127,17 @@ export default function App() {
             selected={selected}
           />
           <OrbitControls />
+
+          <directionalLight
+            position={[-5, 5, 3]}   
+            intensity={3}            
+            color="#ffffff"
+          />
+          <directionalLight
+            position={[-3, 2, 5]} 
+            intensity={1.5}
+          />
+          <ambientLight intensity={0.4} />
         </Canvas>
 
         <button

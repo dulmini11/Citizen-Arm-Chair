@@ -46,6 +46,31 @@ export default function ChairModel({ backType, textureMap }) {
   }, [scene, backType]);
 
   useEffect(() => {
+      if (!scene) return;
+
+      // Silver metallic citizen_base
+      const base = scene.getObjectByName("citizen_base");
+      if (base) {
+        const lightenMesh = (mesh) => {
+          if (!mesh.isMesh) return;
+          if (!mesh._originalBaseMaterial) {
+            mesh._originalBaseMaterial = mesh.material.clone();
+          }
+          const mat = mesh._originalBaseMaterial.clone();
+          mat.color.set(0xb8cfe8);     
+          mat.roughness = 0.28;  
+          mat.metalness = 0.9;   
+          mat.envMapIntensity = 1.5;   
+          mat.needsUpdate = true;
+          mesh.material = mat;
+        };
+        if (base.isMesh) lightenMesh(base);
+        else base.traverse(lightenMesh);
+      }
+
+    }, [scene]);
+
+  useEffect(() => {
     if (!scene) return;
 
     //  Apply texture to ALL three parts so switching back type keeps texture
