@@ -146,7 +146,7 @@ export default function App() {
       </div>
 
       {!expanded && (
-        <div className="w-[25%] h-full bg-white flex flex-col items-start justify-start p-6">
+        <div className="w-[25%] h-full bg-white flex flex-col items-start justify-start p-6 overflow-y-auto">
           <h1 className="leading-8 font-popp text-lg font-bold md:text-3xl md:font-semibold md:leading-10">
             Citizen Arm Chair
           </h1>
@@ -163,28 +163,28 @@ export default function App() {
           <ChairDropdown value={backType} onChange={setBackType} />
 
           {/* Seat section */}
-          <h4 className="mb-2">Seat</h4>
-          <div className="flex bg-white w-full overflow-hidden rounded-md">
-            {["Plano", "Laser", "Cosy", "Credo"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setSeatTab(tab);
-                setSeatSelected(null);
-              }}
-              className={`flex-1 py-2 text-center border border-gray-300 hover:bg-gray-200 ${
-                seatTab === tab
-                  ? "bg-blue-600 text-white"
-                  : "text-black"
-              }`}
-            >
-              {tab}
-              </button>
-            ))}
+          <div className="w-full bg-white rounded-md border border-gray-300">
+            <div className="flex">
+              {["Plano", "Laser", "Cosy", "Credo"].map((tab, i, arr) => (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setSeatTab(tab);
+                    setSeatSelected(null);
+                  }}
+                  className={`flex-1 py-2 text-center hover:bg-gray-200
+                  ${i !== arr.length - 1 ? "border-r border-gray-300" : ""}
+                  ${seatTab === tab ? "bg-blue-600 text-black" : "text-black"}
+                  `}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Seat Circles */}
-          <div className="flex gap-6 mt-6 mb-12">
+          <div className="flex gap-4 mt-4 mb-8">
             {materials[seatTab].map((img, index) => (
               <div
                 key={index}
@@ -207,28 +207,29 @@ export default function App() {
           {/* Neck Cushion — only visible when high back is selected */}
           {backType === "high" && (
             <>
-              <h4 className="mb-2">Neck Cushion</h4>
-              <div className="flex bg-white w-full overflow-hidden rounded-md">
-                {["Plano", "Laser", "Cosy"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setNeckTab(tab);
-                    setNeckSelected(null);
-                  }}
-                  className={`flex-1 py-2 text-center border border-gray-300 hover:bg-gray-200 ${
-                    neckTab === tab
-                      ? "bg-blue-600 text-white"
-                      : "text-black"
-                  }`}
-                >
-                  {tab}
-                  </button>
-                ))}
+              <h4 className="mb-3">Neck Cushion</h4>
+              <div className="w-full bg-white rounded-md border border-gray-300">
+                <div className="flex">
+                  {["Plano", "Laser", "Cosy"].map((tab, i, arr) => (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        setNeckTab(tab);
+                        setNeckSelected(null);
+                      }}
+                      className={`flex-1 py-2 text-center hover:bg-gray-200
+                      ${i !== arr.length - 1 ? "border-r border-gray-300" : ""}
+                      ${neckTab === tab ? "bg-blue-600 text-black" : "text-black"}
+                      `}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Neck Cushion Circles */}
-              <div className="flex gap-6 mt-6 mb-12">
+              <div className="flex gap-4 mt-4 mb-8">
                 {materials[neckTab].map((img, index) => (
                   <div
                     key={index}
@@ -250,9 +251,9 @@ export default function App() {
             </>
           )}
 
-          <button className="focus:outline-none w-full h-12 bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white text-center text-base md:text-xl ">
-            Purchase
-          </button>
+        <button className="focus:outline-none w-full h-12 bg-[#336ae7] bg-gradient-to-b from-butbluegrad1 to-butbluegrad2 rounded-md hover:opacity-95 text-white text-center text-base md:text-xl mt-2 mb-4">
+          Purchase
+        </button>
         </div>
       )}
 
