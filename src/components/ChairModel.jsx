@@ -93,7 +93,7 @@ export default function ChairModel({ backType, textureMap, neckTextureMap }) {
       if (activeTexture) {
         const t = activeTexture.clone();
         t.colorSpace = THREE.SRGBColorSpace;
-        t.repeat.set(120, 120);
+        t.repeat.set(840, 840);
         t.wrapS = THREE.RepeatWrapping;
         t.wrapT = THREE.RepeatWrapping;
         t.needsUpdate = true;
